@@ -10,14 +10,35 @@ import {
   ScrollView,
 } from "react-native";
 import { theme } from "./colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+type Todos = {
+  [key: string]: { text: string; isWork: boolean };
+};
 
 export default function App() {
   const [isWork, setIsWork] = useState(true);
   const [text, setText] = useState("");
-  const [todos, setTodos] = useState<{
-    [key: string]: { text: string; isWork: boolean };
-  }>({});
+  const [todos, setTodos] = useState<Todos>({});
+
+  useEffect(() => {
+    (async () => {
+      await loadTodos();
+    })();
+  }, []);
+
+  const onSaveTodos = async (todos: Todos) => {
+    await AsyncStorage.setItem("todos", JSON.stringify(todos));
+  };
+
+  const loadTodos = async () => {
+    const todos = await AsyncStorage.getItem("todos");
+
+    if (todos) {
+      setTodos(JSON.parse(todos));
+    }
+  };
 
   const onPressTravel = () => {
     setIsWork(false);
@@ -28,7 +49,7 @@ export default function App() {
   const onChangeText = (text: string) => {
     setText(text);
   };
-  const addTodo = (
+  const addTodo = async (
     e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
   ) => {
     const { text } = e.nativeEvent;
@@ -39,6 +60,7 @@ export default function App() {
     });
 
     setTodos(newTodo);
+    await onSaveTodos(newTodo);
     setText("");
   };
 
@@ -79,13 +101,11 @@ export default function App() {
         {Object.keys(todos).map((key) => {
           const todo = todos[key];
 
-          return (
-            <View style={styles.todo}>
-              <Text style={styles.todoText} key={key}>
-                {todo.text}
-              </Text>
+          return todos[key].isWork === isWork ? (
+            <View style={styles.todo} key={key}>
+              <Text style={styles.todoText}>{todo.text}</Text>
             </View>
-          );
+          ) : null;
         })}
       </ScrollView>
     </View>
