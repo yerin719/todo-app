@@ -5,6 +5,8 @@ import {
   View,
   TouchableOpacity,
   TextInput,
+  NativeSyntheticEvent,
+  TextInputSubmitEditingEventData,
 } from "react-native";
 import { theme } from "./colors";
 import { useState } from "react";
@@ -12,6 +14,9 @@ import { useState } from "react";
 export default function App() {
   const [isWork, setIsWork] = useState(true);
   const [text, setText] = useState("");
+  const [todos, setTodos] = useState<{
+    [key: string]: { text: string; isWork: boolean };
+  }>({});
 
   const onPressTravel = () => {
     setIsWork(false);
@@ -21,6 +26,19 @@ export default function App() {
   };
   const onChangeText = (text: string) => {
     setText(text);
+  };
+  const addTodo = (
+    e: NativeSyntheticEvent<TextInputSubmitEditingEventData>,
+  ) => {
+    const { text } = e.nativeEvent;
+    if (!text) return;
+
+    const newTodo = Object.assign({}, todos, {
+      [Date.now()]: { text, isWork },
+    });
+
+    setTodos(newTodo);
+    setText("");
   };
 
   return (
@@ -49,6 +67,9 @@ export default function App() {
         </TouchableOpacity>
       </View>
       <TextInput
+        onSubmitEditing={addTodo}
+        returnKeyType="done"
+        value={text}
         onChangeText={onChangeText}
         style={styles.input}
         placeholder={isWork ? "Add a To Do" : "Where do you want to go"}
