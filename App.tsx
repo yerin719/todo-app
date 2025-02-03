@@ -7,6 +7,7 @@ import {
   TextInput,
   NativeSyntheticEvent,
   TextInputSubmitEditingEventData,
+  ScrollView,
 } from "react-native";
 import { theme } from "./colors";
 import { useState } from "react";
@@ -74,6 +75,19 @@ export default function App() {
         style={styles.input}
         placeholder={isWork ? "Add a To Do" : "Where do you want to go"}
       />
+      <ScrollView>
+        {Object.keys(todos).map((key) => {
+          const todo = todos[key];
+
+          return (
+            <View style={styles.todo}>
+              <Text style={styles.todoText} key={key}>
+                {todo.text}
+              </Text>
+            </View>
+          );
+        })}
+      </ScrollView>
     </View>
   );
 }
@@ -100,5 +114,15 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 20,
     marginTop: 10,
+  },
+  todo: {
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderRadius: 20,
+    marginTop: 10,
+  },
+  todoText: {
+    fontWeight: "500",
   },
 });
