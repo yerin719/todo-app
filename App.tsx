@@ -8,10 +8,12 @@ import {
   NativeSyntheticEvent,
   TextInputSubmitEditingEventData,
   ScrollView,
+  Alert,
 } from "react-native";
 import { theme } from "./colors";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Octicons from "@expo/vector-icons/Octicons";
 
 type Todos = {
   [key: string]: { text: string; isWork: boolean };
@@ -64,6 +66,25 @@ export default function App() {
     setText("");
   };
 
+  const deleteTodo = (key) => {
+    Alert.alert("confirm Delete", "are you sure?", [
+      {
+        text: "Cancel",
+      },
+      {
+        text: "OK",
+        onPress: () => {
+          const newTodo = { ...todos };
+          delete newTodo[key];
+
+          setTodos(newTodo);
+          onSaveTodos(newTodo);
+          setText("");
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
@@ -104,6 +125,11 @@ export default function App() {
           return todos[key].isWork === isWork ? (
             <View style={styles.todo} key={key}>
               <Text style={styles.todoText}>{todo.text}</Text>
+              <TouchableOpacity onPress={() => deleteTodo(key)}>
+                <Text>
+                  <Octicons name="trash" size={24} color="black" />
+                </Text>
+              </TouchableOpacity>
             </View>
           ) : null;
         })}
@@ -141,6 +167,8 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 20,
     marginTop: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   todoText: {
     fontWeight: "500",
